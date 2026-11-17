@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Student Performance Evaluation System</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#f2f5f9;--card:#fff;--ink:#14213d;--mute:#5b6679;--line:#d9e0ea;--acc:#2a6f97;--ok:#2e7d5b;--bad:#b3372f;--bar:#2a6f97;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1522;--card:#17202f;--ink:#e8edf5;--mute:#98a3b6;--line:#2a3548;--acc:#6bb3dc;--ok:#5cc08f;--bad:#f0877f;--bar:#6bb3dc}}
+:root[data-theme="dark"]{--bg:#0e1522;--card:#17202f;--ink:#e8edf5;--mute:#98a3b6;--line:#2a3548;--acc:#6bb3dc;--ok:#5cc08f;--bad:#f0877f;--bar:#6bb3dc}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Schibsted Grotesk",system-ui,sans-serif;line-height:1.45}
+.wrap{max-width:1000px;margin:0 auto;padding:16px}
+h1{font-size:1.6rem;font-weight:800;margin:8px 0 2px;letter-spacing:-.02em}
+h2{font-size:1.05rem;margin:0 0 12px}
+.sub{color:var(--mute);margin:0 0 16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.stat b{display:block;font-size:1.4rem;font-weight:800}
+.stat span{color:var(--mute);font-size:.82rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+label{font-size:.82rem;color:var(--mute);display:block;margin-bottom:3px}
+input{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+input:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{font:inherit;font-weight:600;padding:10px 14px;border-radius:8px;border:1px solid var(--acc);background:var(--acc);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--acc)}
+button.del{padding:4px 8px;border-color:var(--line);background:transparent;color:var(--bad)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:.92rem}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mute);font-weight:600;font-size:.82rem}
+.pill{padding:2px 8px;border-radius:99px;font-size:.78rem;font-weight:600;border:1px solid currentColor}
+.pass{color:var(--ok)}.fail{color:var(--bad)}
+.bars div.b{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:.9rem}
+.bars .n{width:84px}.bars .t{flex:1;height:14px;background:var(--bg);border-radius:7px;overflow:hidden}
+.bars .f{height:100%;background:var(--bar);border-radius:7px;transition:width .4s}
+.err{color:var(--bad);font-size:.88rem;min-height:1.2em;margin-top:8px}
+@media(prefers-reduced-motion:reduce){.f{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Student Performance Evaluation System</h1>
+<p class="sub">Enter marks out of 100. Totals, percentage, grade, rank and class analysis update automatically.</p>
+
+<div class="stats" id="stats"></div>
+
+<div class="card">
+<h2>Add student</h2>
+<div class="grid">
+<div><label for="name">Name</label><input id="name" placeholder="Student name"></div>
+<div><label for="roll">Roll no.</label><input id="roll" placeholder="e.g. 101"></div>
+<div><label for="m0">Maths</label><input id="m0" type="number" min="0" max="100" inputmode="numeric"></div>
+<div><label for="m1">Science</label><input id="m1" type="number" min="0" max="100" inputmode="numeric"></div>
+<div><label for="m2">English</label><input id="m2" type="number" min="0" max="100" inputmode="numeric"></div>
+<div><label for="m3">Hindi</label><input id="m3" type="number" min="0" max="100" inputmode="numeric"></div>
+<div><label for="m4">Computer</label><input id="m4" type="number" min="0" max="100" inputmode="numeric"></div>
+</div>
+<div class="err" id="err" role="alert"></div>
+<div class="row"><button id="add">Add student</button><button class="ghost" id="sample">Load sample data</button><button class="ghost" id="clear">Clear all</button></div>
+</div>
+
+<div class="card">
+<h2>Results</h2>
+<label for="q">Search by name or roll no.</label>
+<input id="q" placeholder="Type to filter" style="margin-bottom:12px">
+<div class="scroll"><table>
+<thead><tr><th>Rank</th><th>Roll</th><th>Name</th><th>Total /500</th><th>%</th><th>Grade</th><th>Result</th><th></th></tr></thead>
+<tbody id="rows"></tbody></table></div>
+<div id="empty" class="sub" style="margin:12px 0 0">No students yet. Add one above or load sample data.</div>
+</div>
+
+<div class="card"><h2>Subject-wise class average</h2><div class="bars" id="bars"></div></div>
+</div>
+
+<script>
+var SUBJ=["Maths","Science","English","Hindi","Computer"],PASS=35,KEY="spes_students";
+var data=[];
+function load(){try{var s=localStorage.getItem(KEY);if(s)data=JSON.parse(s)||[]}catch(e){data=[]}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
+function grade(p){return p>=90?"A+":p>=80?"A":p>=70?"B+":p>=60?"B":p>=50?"C":p>=40?"D":"F"}
+function calc(s){var t=s.m.reduce(function(a,b){return a+b},0);return{total:t,pct:t/SUBJ.length,pass:s.m.every(function(x){return x>=PASS})}}
+function esc(x){return String(x).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function render(){
+ var list=data.map(function(s){var c=calc(s);return{s:s,total:c.total,pct:c.pct,pass:c.pass}}).sort(function(a,b){return b.total-a.total});
+ list.forEach(function(r,i){r.rank=(i&&r.total===list[i-1].total)?list[i-1].rank:i+1});
+ var q=document.getElementById("q").value.toLowerCase();
+ var shown=list.filter(function(r){return r.s.name.toLowerCase().indexOf(q)>-1||String(r.s.roll).toLowerCase().indexOf(q)>-1});
+ document.getElementById("rows").innerHTML=shown.map(function(r){
+  return '<tr><td>'+r.rank+'</td><td>'+esc(r.s.roll)+'</td><td>'+esc(r.s.name)+'</td><td>'+r.total+'</td><td>'+r.pct.toFixed(1)+'</td><td><b>'+grade(r.pct)+'</b></td><td><span class="pill '+(r.pass?'pass':'fail')+'">'+(r.pass?'Pass':'Fail')+'</span></td><td><button class="del" data-id="'+r.s.id+'" aria-label="Delete '+esc(r.s.name)+'">Delete</button></td></tr>'}).join("");
+ document.getElementById("empty").style.display=shown.length?"none":"block";
+ var n=list.length,avg=n?list.reduce(function(a,r){return a+r.pct},0)/n:0,pp=n?list.filter(function(r){return r.pass}).length/n*100:0;
+ var top=n?list[0].s.name:"-";
+ document.getElementById("stats").innerHTML=[["Students",n],["Class average",avg.toFixed(1)+"%"],["Pass rate",pp.toFixed(0)+"%"],["Topper",esc(top)]].map(function(x){return '<div class="stat"><b>'+x[1]+'</b><span>'+x[0]+'</span></div>'}).join("");
+ document.getElementById("bars").innerHTML=SUBJ.map(function(sj,i){var a=n?data.reduce(function(t,s){return t+s.m[i]},0)/n:0;return '<div class="b"><span class="n">'+sj+'</span><span class="t"><span class="f" style="display:block;width:'+a+'%"></span></span><b>'+a.toFixed(1)+'</b></div>'}).join("");
+}
+document.getElementById("add").onclick=function(){
+ var name=document.getElementById("name").value.trim(),roll=document.getElementById("roll").value.trim(),m=[],err=document.getElementById("err");
+ if(!name||!roll){err.textContent="Enter the student's name and roll number.";return}
+ if(data.some(function(s){return s.roll===roll})){err.textContent="Roll number "+roll+" already exists. Use a different one.";return}
+ for(var i=0;i<5;i++){var v=document.getElementById("m"+i).value;if(v===""||isNaN(v)||+v<0||+v>100){err.textContent="Enter "+SUBJ[i]+" marks between 0 and 100.";return}m.push(+v)}
+ err.textContent="";data.push({id:Date.now()+Math.random(),name:name,roll:roll,m:m});save();
+ ["name","roll","m0","m1","m2","m3","m4"].forEach(function(id){document.getElementById(id).value=""});render();
+};
+document.getElementById("rows").onclick=function(e){var id=e.target.getAttribute("data-id");if(id){data=data.filter(function(s){return String(s.id)!==id});save();render()}};
+document.getElementById("q").oninput=render;
+document.getElementById("clear").onclick=function(){if(confirm("Delete all students?")){data=[];save();render()}};
+document.getElementById("sample").onclick=function(){
+ var d=[["Aarav Sharma",101,[92,88,81,76,95]],["Diya Patel",102,[78,84,90,88,82]],["Rohan Verma",103,[45,52,60,48,70]],["Sneha Gupta",104,[96,94,89,91,98]],["Kabir Singh",105,[30,41,55,38,62]],["Meera Nair",106,[67,72,70,65,74]]];
+ d.forEach(function(x){if(!data.some(function(s){return s.roll===String(x[1])}))data.push({id:Date.now()+Math.random(),name:x[0],roll:String(x[1]),m:x[2]})});save();render();
+};
+load();render();
+</script>
+</body>
+</html>
